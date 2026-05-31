@@ -1,6 +1,6 @@
 # GitHub Stargazer Predictor
 
-Predicts how many stars a GitHub repo has from its activity data (forks, watchers, commits, issues, releases, age, language, and so on).
+Predicts how many stars a GitHub repo has from its activity data (forks, watchers, commits, issues, releases, age, language, etc).
 Give it a few repos and it ranks them by predicted stars.
 
 Everything runs locally in Docker containers with hard CPU and RAM caps.
