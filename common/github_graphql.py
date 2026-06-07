@@ -30,6 +30,7 @@ query($q: String!, $cursor: String)
                 forkCount
                 watchers { totalCount }
                 issues(states: OPEN) { totalCount }
+                allIssues: issues { totalCount }
                 pullRequests(states: OPEN) { totalCount }
                 releases { totalCount }
                 repositoryTopics { totalCount }
@@ -67,6 +68,7 @@ query($owner: String!, $name: String!)
         forkCount
         watchers { totalCount }
         issues(states: OPEN) { totalCount }
+        allIssues: issues { totalCount }
         pullRequests(states: OPEN) { totalCount }
         releases { totalCount }
         repositoryTopics { totalCount }
@@ -99,6 +101,7 @@ def flatten(node):
         "forks_count": node["forkCount"],
         "watchers": node["watchers"]["totalCount"],
         "open_issues_count": node["issues"]["totalCount"],
+        "total_issues_count": node["allIssues"]["totalCount"],  # open + closed, for a real issue rate
         "open_pulls_count": node["pullRequests"]["totalCount"],
         "release_count": node["releases"]["totalCount"],
         "topics_count": node["repositoryTopics"]["totalCount"],
