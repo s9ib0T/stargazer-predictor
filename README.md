@@ -9,6 +9,12 @@ Everything runs locally in Docker containers with hard CPU and RAM caps.
 
 Needs Python 3.10+ and a GitHub token.
 
-    cp .env.example .env      # put your token in it
+    cp .env.example .env  # put your token in it
     python3 -m venv .venv && source .venv/bin/activate
     pip install -r requirements.txt
+
+## Crawl data (needs a token)
+
+Pull repos across the full star range into `data/raw/repos.jsonl`:
+
+    python -m crawler.run_all  # ~5000 repos, all star bands
