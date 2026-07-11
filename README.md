@@ -18,3 +18,12 @@ Needs Python 3.10+ and a GitHub token.
 Pull repos across the full star range into `data/raw/repos.jsonl`:
 
     python -m crawler.run_all  # ~5000 repos, all star bands
+
+## Try it offline (no token)
+
+Proves the pipeline on synthetic data, no GitHub needed:
+
+    python scripts/demo_seed.py  # make a fake repos.jsonl
+    python -m trainer.build_dataset  # features + train/test split
+
+
