@@ -1,6 +1,6 @@
 """
-make a small synthetic data/raw/repos.jsonl so the whole pipeline (build_dataset -> train -> select_best -> predictor) can be tested offline, no github token, no network.
-features are correlated with stars on purpose so the models actually learn something.
+make a small synthetic data/raw/repos.jsonl so the whole pipeline (build_dataset -> train -> select_best -> predictor) can be tested offline, no github token, no network
+features are correlated with stars on purpose so the models actually learn something
 """
 
 import json
@@ -32,7 +32,8 @@ with OUT.open("w") as f:
         watchers = max(0, int(scale * random.uniform(0.02, 0.1)))
         commits = max(1, int(scale * random.uniform(0.5, 5) + random.uniform(0, 500)))
         issues = max(0, int(scale * random.uniform(0.01, 0.2)))
-        # open + closed, always >= open. the issue-rate features divide by this
+        # open + closed, always >= open
+        # the issue-rate features divide by this
         total_issues = issues + int(scale * random.uniform(0.1, 1.0))
         age = random.randint(60, 4000)
         repo = {
