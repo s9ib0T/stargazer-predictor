@@ -25,6 +25,8 @@ Proves the pipeline on synthetic data, no GitHub needed:
 
     python scripts/demo_seed.py  # make a fake repos.jsonl
     python -m trainer.build_dataset  # features + train/test split
-    python -m trainer.train --num-shards 1 --jobs -1  # train the grid
+    python -m trainer.train --num-shards 1 --jobs -2  # train the grid
+    python -m trainer.select_best  # pick best -> models/production/best.joblib
+
 
 

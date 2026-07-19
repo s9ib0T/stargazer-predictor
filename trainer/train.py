@@ -5,8 +5,8 @@ the grid is the same fixed list on every worker (see grid.py), so each worker ju
 results go one file per job into the shared trials dir, no talking between workers
 
 examples:
-    # everything on one machine, all cores
-    python -m trainer.train --num-shards 1 --jobs -1
+    # everything on one machine, all cores but one
+    python -m trainer.train --num-shards 1 --jobs -2
 
     # worker 0 of 3
     python -m trainer.train --shard-index 0 --num-shards 3 --jobs 1
@@ -48,7 +48,7 @@ def parse_args():
     p.add_argument("--shard-index", type=int, default=0)
     p.add_argument("--num-shards", type=int, default=1, help="1 = run everything")
     p.add_argument("--model", choices=MODELS, help="only this model (default all)")
-    p.add_argument("--jobs", type=int, default=1, help="cores on this worker, -1 = all")
+    p.add_argument("--jobs", type=int, default=1, help="cores on this worker, -2 = all but one")
     p.add_argument("--max-jobs", type=int, default=0, help="cap jobs (quick/vertical run)")
     p.add_argument("--data-dir", default=str(DATA_DIR))
     p.add_argument("--out-dir", default=str(MODELS_DIR))
