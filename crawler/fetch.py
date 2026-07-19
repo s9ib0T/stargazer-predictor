@@ -20,7 +20,7 @@ def setup_logging():
 
 
 def fetch_band(client, lo, hi, per_band, out_dir, with_contributors=False):
-    # crawl one star band into its own shard file.
+    # crawl one star band into its own shard file
     # resumable: a .done marker means the band finished, skip it on rerun
     label = band_label(lo, hi)
     out = Path(out_dir) / f"repos_{label}.jsonl"
@@ -54,7 +54,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="crawl one star band (a shard)")
     p.add_argument("--band-index", type=int, required=True,
                    help="which band from make_bands() to crawl")
-    p.add_argument("--per-band", type=int, default=420)
+    p.add_argument("--per-band", type=int, default=400)
     p.add_argument("--out-dir", type=Path, default=Path("data/raw/shards"))
     p.add_argument("--with-contributors", action="store_true",
                    help="extra REST call/repo for contributor_count")

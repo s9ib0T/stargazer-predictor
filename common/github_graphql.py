@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 # one search page = up to 40 repos + their counts in a single call
 # the nested connections only ask for totalCount so they cost ~0 points, a page is basically 1 point -> way cheaper than the old 4 REST calls/repo
-# first:40 not 100: github times out building a big page for this query and returns 502. measured 502 rate: 100/75 always fail, 50 ~1 in 12, 40 and below clean. the 5xx retry in _post covers the rare miss
+# first:40 not 100: github times out building a big page for this query and returns 502
 SEARCH_QUERY = """
 query($q: String!, $cursor: String)
 {
@@ -57,7 +57,8 @@ query($q: String!)
 }
 """
 
-# single repo lookup for the predictor (no search). same fields as above
+# single repo lookup for the predictor (no search)
+# same fields as above
 REPO_QUERY = """
 query($owner: String!, $name: String!)
 {
@@ -139,7 +140,8 @@ class GitHubGraphQL:
         )
         
     def _post(self, query, variables, max_retries=4):
-        # one graphql request. sleeps through rate limits, retries 5xx
+        # one graphql request
+        # sleeps through rate limits, retries 5xx
         for attempt in range(max_retries + 1):
             r = self.session.post(GRAPHQL_URL, json={"query": query, "variables": variables})
             
@@ -202,7 +204,8 @@ class GitHubGraphQL:
             cursor = page["endCursor"]
     
     def get_repo(self, full_name):
-        # single repo for the predictor. full_name like "owner/name"
+        # single repo for the predictor
+        # full_name like "owner/name"
         owner, name = full_name.split("/", 1)
         node = self._post(REPO_QUERY, {"owner": owner, "name": name})["repository"]
         if node is None:
@@ -210,7 +213,8 @@ class GitHubGraphQL:
         return flatten(node)
     
     def contributor_count(self, full_name):
-        # optional extra. graphql cant do contributors, so REST Link header trick
+        # optional extra
+        # graphql cant do contributors, so REST Link header trick
         url = f"{REST_API}/repos/{full_name}/contributors"
         r = self.session.get(url, params={"per_page": 1, "anon": "true"})
         r.raise_for_status()
