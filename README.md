@@ -21,12 +21,17 @@ Pull repos across the full star range into `data/raw/repos.jsonl`:
 
 ## Try it offline (no token)
 
-Proves the pipeline on synthetic data, no GitHub needed:
+Proves the pipeline on synthetic data, no GitHub token needed:
 
     python scripts/demo_seed.py  # make a fake repos.jsonl
     python -m trainer.build_dataset  # features + train/test split
     python -m trainer.train --num-shards 1 --jobs -2  # train the grid
     python -m trainer.select_best  # pick best -> models/production/best.joblib
 
+## Predict
 
+Rank repos by predicted stars (needs a token):
 
+    python -m predictor.app facebook/react torvalds/linux tinygrad/tinygrad
+
+For a real run from scratch: crawl, then build/train/select (same commands as the offline block, without demo_seed), then predict.
