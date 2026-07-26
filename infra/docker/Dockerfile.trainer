@@ -1,0 +1,12 @@
+# trainer image, used for train, select_best and the scaling experiments
+FROM python:3.11-slim
+WORKDIR /app
+
+COPY requirements-trainer.txt .
+RUN pip install --no-cache-dir -r requirements-trainer.txt
+
+COPY common/ ./common/
+COPY trainer/ ./trainer/
+
+# no default cmd, the command is passed at run time, eg:
+#   docker compose run --rm trainer python -m trainer.train --num-shards 1 --jobs -2

@@ -1,0 +1,14 @@
+# crawler image, small, just needs requests
+FROM python:3.11-slim
+WORKDIR /app
+
+COPY requirements-crawler.txt .
+RUN pip install --no-cache-dir -r requirements-crawler.txt
+
+COPY common/ ./common/
+COPY crawler/ ./crawler/
+
+# default: crawl all bands then merge
+# override to run a single band, eg:
+#   docker compose run --rm crawler python -m crawler.fetch --band-index 0
+CMD ["python", "-m", "crawler.run_all"]
