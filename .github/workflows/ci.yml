@@ -1,11 +1,10 @@
-# runs the whole pipeline from a clean checkout on every push and pull request
-# no github token needed, the pipeline job trains on synthetic data
+# runs whole pipeline from clean checkout on every pull request
+# no github token needed, pipeline job trains on synthetic data
 name: ci
 
+# no push trigger, main is protected so everything arrives via pull request
 on:
   pull_request:
-  push:
-    branches: [main]
 
 jobs:
   # crawl skipped (needs token), everything after runs for real

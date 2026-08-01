@@ -1,5 +1,7 @@
 # GitHub Stargazer Predictor
 
+![ci](https://github.com/s9ib0T/stargazer-predictor/actions/workflows/ci.yml/badge.svg)
+
 Predicts how many stars a GitHub repo has from its activity data (forks, watchers, commits, issues, releases, age, language, etc).
 Give it a few repos and it ranks them by predicted stars.
 
@@ -44,3 +46,13 @@ Same steps, in containers with CPU and RAM caps:
     docker compose run --rm trainer python -m trainer.train --num-shards 1 --jobs 1
     docker compose run --rm trainer python -m trainer.select_best
     docker compose run --rm predictor python -m predictor.app facebook/react
+
+## CI
+
+Every pull request runs the full pipeline on synthetic data and builds the three images:
+
+    .github/workflows/ci.yml
+
+No token needed, it trains on `demo_seed.py` output. The trained model from each run is downloadable from the Actions tab.
+
+`main` is protected: no direct pushes, everything goes through a pull request with both checks green.
