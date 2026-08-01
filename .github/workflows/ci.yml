@@ -1,0 +1,60 @@
+# runs the whole pipeline from a clean checkout on every push and pull request
+# no github token needed, the pipeline job trains on synthetic data
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # crawl skipped (needs token), everything after runs for real
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11" # same as docker images
+          cache: pip
+
+      # trainer deps, broken req split shows here
+      - run: pip install -r requirements-trainer.txt
+
+      - name: seed synthetic data
+        run: python scripts/demo_seed.py
+
+      - name: build dataset
+        run: python -m trainer.build_dataset
+
+      - name: train the grid
+        run: python -m trainer.train --num-shards 1 --jobs -2
+      
+      - name: pick the best model
+        run: python -m trainer.select_best
+
+      # model file useless if it cant be loaded back
+      - name: check the model loads and predicts
+        run: |
+          python - <<'EOF'
+          import joblib, pandas as pd
+          m = joblib.load("models/production/best.joblib")
+          X = pd.read_parquet("data/processed/X_test.parquet")
+          print(f"model loaded, predicted {len(m.predict(X))} rows")
+          EOF
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: best-model
+          path: models/production/
+          
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # compose wont parse if env_file is missing
+      - run: cp .env.example .env
+
+      - run: docker compose build
