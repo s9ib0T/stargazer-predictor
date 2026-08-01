@@ -1,0 +1,12 @@
+# predictor image, cli that ranks repos by predicted stars
+FROM python:3.11-slim
+WORKDIR /app
+
+COPY requirements-predictor.txt .
+RUN pip install --no-cache-dir -r requirements-predictor.txt
+
+COPY common/ ./common/
+COPY predictor/ ./predictor/
+
+# no default cmd, pass the repos at run time, eg:
+#   docker compose run --rm predictor python -m predictor.app facebook/react torvalds/linux

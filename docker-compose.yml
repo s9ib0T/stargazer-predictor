@@ -1,0 +1,45 @@
+# all services run locally with hard cpu/ram caps (cgroups via docker)
+# the ./data and ./models bind mounts are the shared "disk" between steps
+#
+# cpus + mem_limit are enforced by "docker compose up/run" without swarm
+# check it with: docker stats
+
+services:
+  crawler:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.crawler
+    image: stargazer-crawler
+    env_file: .env
+    cpus: 1.0
+    mem_limit: 512m
+    volumes:
+      - ./data:/app/data
+
+  # one worker
+  # for many workers run several of these with --shard-index/--num-shards, see experiments/run_horizontal.sh
+  trainer:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.trainer
+    image: stargazer-trainer
+    cpus: 1.0
+    mem_limit: 1g
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    command: ["python", "-m", "trainer.train", "--num-shards", "1", "--jobs", "1"]
+
+  # predictor cli, reads the model from ./models, run it like:
+  #   docker compose run --rm predictor python -m predictor.app facebook/react
+  predictor:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.predictor
+    image: stargazer-predictor
+    env_file: .env
+    cpus: 1.0
+    mem_limit: 512m
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data

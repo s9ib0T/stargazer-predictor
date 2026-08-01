@@ -35,3 +35,12 @@ Rank repos by predicted stars (needs a token):
     python -m predictor.app facebook/react torvalds/linux tinygrad/tinygrad
 
 For a real run from scratch: crawl, then build/train/select (same commands as the offline block, without demo_seed), then predict.
+
+## Run in Docker
+
+Same steps, in containers with CPU and RAM caps:
+
+    docker compose build
+    docker compose run --rm trainer python -m trainer.train --num-shards 1 --jobs 1
+    docker compose run --rm trainer python -m trainer.select_best
+    docker compose run --rm predictor python -m predictor.app facebook/react
