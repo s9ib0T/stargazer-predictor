@@ -68,9 +68,11 @@ def main():
 
     (models_dir / "results.json").write_text(json.dumps(summary, indent=2))
 
-    # winner judged on log-space r2 (fair across magnitudes)
-    best_name = max(summary, key=lambda n: summary[n]["r2_log"])
-    print(f"\nbest: {best_name} (test r2_log={summary[best_name]['r2_log']:.4f})")
+    # judged on the cv score
+    # cv_r2 is log-space r2, fair across magnitudes
+    best_name = max(summary, key=lambda n: summary[n]["cv_r2"])
+    print(f"\nbest: {best_name} (cv_r2={summary[best_name]['cv_r2']:.4f}, "
+          f"held-out test r2_log={summary[best_name]['r2_log']:.4f})")
 
     prod.mkdir(parents=True, exist_ok=True)
     joblib.dump(fitted[best_name], prod / "best.joblib")
