@@ -21,6 +21,8 @@ from sklearn.ensemble import (
 )
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error, r2_score, root_mean_squared_error
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 DATA_DIR = Path("data/processed")
 MODELS_DIR = Path("models")
@@ -90,9 +92,13 @@ def create_model(name, cfg):
             max_depth=cfg.get("max_depth"),
             random_state=68,
         )
+    # linear models get scaled features first
+    # disk_usage runs to 5e7 while the one-hot columns are 0/1, which makes X'X badly conditioned
+    # sklearn then warns on every Ridge fit, and alpha is far too small to regularize anything
+    # trees do not care about scale, so they stay as they are
     if name == "Ridge":
-        return Ridge(alpha=cfg.get("alpha", 1.0))
-    return LinearRegression()
+        return make_pipeline(StandardScaler(), Ridge(alpha=cfg.get("alpha", 1.0)))
+    return make_pipeline(StandardScaler(), LinearRegression())
 
 
 def build_jobs(models=None):
@@ -110,6 +116,19 @@ def build_jobs(models=None):
             c.update(dict(zip(keys, combo)))
             jobs.append(c)
     return jobs
+
+
+def job_weight(cfg):
+    # rough relative cost of one config, only used to spread work evenly over shards
+    # number of trees dominates the runtime, everything else is noise next to it
+    per_model = {
+        "RandomForest": 1.0,
+        "ExtraTrees": 0.4,
+        "GradientBoosting": 0.4,
+        "HistGradientBoosting": 0.05,
+    }
+    trees = cfg.get("n_estimators", cfg.get("max_iter", 1))
+    return per_model.get(cfg["model_name"], 0.001) * trees
 
 
 def config_id(cfg):
