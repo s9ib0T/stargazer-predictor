@@ -77,19 +77,11 @@ def main():
     prod.mkdir(parents=True, exist_ok=True)
     joblib.dump(fitted[best_name], prod / "best.joblib")
 
-    # feature importance if available, nice for the report
-    importance = {}
-    bm = fitted[best_name]
-    if hasattr(bm, "feature_importances_"):
-        importance = dict(sorted(zip(list(X_train.columns), bm.feature_importances_.tolist()),
-                                 key=lambda kv: kv[1], reverse=True))
-
     meta = {
         "model_name": best_name,
         "log_target": True,
         "deployment_time": datetime.now(timezone.utc).isoformat(),
         "metrics": summary[best_name],
-        "feature_importance": importance,
     }
     (prod / "metadata.json").write_text(json.dumps(meta, indent=2))
     print(f"saved model + metadata to {prod}")
