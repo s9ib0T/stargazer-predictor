@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 # numerics copied straight over (missing/None -> 0)
 NUM_FIELDS = [
-    "forks_count",
+    "fork_count",
     "watchers",
     "open_issues_count",
     "total_issues_count",
