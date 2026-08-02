@@ -6,6 +6,7 @@ __pycache__/
 data/
 models/
 experiments/*.csv
+experiments/figures/
 .vscode/
 .DS_Store
 .files/
