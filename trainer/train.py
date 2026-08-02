@@ -24,7 +24,7 @@ from joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score
 
 from trainer.grid import (
-    DATA_DIR, MODELS_DIR, MODELS, build_jobs, config_id, create_model, load_data,
+    DATA_DIR, MODELS_DIR, MODELS, build_jobs, config_id, create_model, job_weight, load_data,
 )
 
 
@@ -49,7 +49,7 @@ def parse_args():
     p.add_argument("--num-shards", type=int, default=1, help="1 = run everything")
     p.add_argument("--model", choices=MODELS, help="only this model (default all)")
     p.add_argument("--jobs", type=int, default=1, help="cores on this worker, -2 = all but one")
-    p.add_argument("--max-jobs", type=int, default=0, help="cap jobs (quick/vertical run)")
+    p.add_argument("--max-jobs", type=int, default=0, help="sample the grid down to N configs, before sharding")
     p.add_argument("--data-dir", default=str(DATA_DIR))
     p.add_argument("--out-dir", default=str(MODELS_DIR))
     return p.parse_args()
@@ -68,13 +68,24 @@ def main():
     y_log = np.log1p(y_train)  # train in log space
 
     all_jobs = build_jobs([args.model] if args.model else None)
+    if args.max_jobs and args.max_jobs < len(all_jobs):
+        # cap before sharding, otherwise each shard count runs a different total and the plot is meaningless
+        # spread the picks over the grid instead of taking the first N
+        # the list is grouped by model, so a plain prefix would drop whole model types
+        step = len(all_jobs) / args.max_jobs
+        all_jobs = [all_jobs[int(i * step)] for i in range(args.max_jobs)]
+    # heaviest configs first
+    # n_estimators is the fastest varying key, so plain round robin can hand one shard every 300-tree forest
+    all_jobs.sort(key=job_weight, reverse=True)
     my_jobs = all_jobs[args.shard_index::args.num_shards]  # every Nth job
-    if args.max_jobs:
-        my_jobs = my_jobs[:args.max_jobs]
     print(f"shard {args.shard_index}/{args.num_shards}: {len(my_jobs)}/{len(all_jobs)} configs, jobs={args.jobs}")
 
     t0 = time.time()
-    res = Parallel(n_jobs=args.jobs)(delayed(run_one)(c, X_train, y_log) for c in my_jobs)
+    # list not generator, so joblib knows the total and can print "N out of M"
+    # joblib verbose writes to stderr, shows up even when stdout is buffered
+    res = Parallel(n_jobs=args.jobs, verbose=10)(
+        [delayed(run_one)(c, X_train, y_log) for c in my_jobs]
+    )
     for r in res:
         write_json_atomic(trials / f"trial_{config_id(r['config'])}.json", r)
         print(f"  {r['model_name']:<22} cv_r2={r['cv_r2']:.4f}")

@@ -56,3 +56,21 @@ Every pull request runs the full pipeline on synthetic data and builds the three
 No token needed, it trains on `demo_seed.py` output. The trained model from each run is downloadable from the Actions tab.
 
 `main` is protected: no direct pushes, everything goes through a pull request with both checks green.
+
+## Scaling experiments
+
+    docker build -t stargazer-trainer -f infra/docker/Dockerfile.trainer .
+    bash experiments/run_horizontal.sh
+    bash experiments/run_vertical.sh
+    python experiments/plots.py  # figures in experiments/figures/
+
+
+## Layout
+
+    common/       shared github client + feature builder
+    crawler/      sharded graphql crawler + merge
+    trainer/      dataset build, sharded training, model selection
+    predictor/    cli predictor
+    scripts/      demo seed + crawl/train wrappers
+    infra/        dockerfiles + git hooks
+    experiments/  scaling scripts + plots
