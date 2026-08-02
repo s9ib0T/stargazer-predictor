@@ -27,8 +27,9 @@ jobs:
       - name: build dataset
         run: python -m trainer.build_dataset
 
+      # -1 not -2, no one is using the runner so take all 4 cores
       - name: train the grid
-        run: python -m trainer.train --num-shards 1 --jobs -2
+        run: python -m trainer.train --num-shards 1 --jobs -1
       
       - name: pick the best model
         run: python -m trainer.select_best
