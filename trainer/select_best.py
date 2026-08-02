@@ -68,26 +68,20 @@ def main():
 
     (models_dir / "results.json").write_text(json.dumps(summary, indent=2))
 
-    # winner judged on log-space r2 (fair across magnitudes)
-    best_name = max(summary, key=lambda n: summary[n]["r2_log"])
-    print(f"\nbest: {best_name} (test r2_log={summary[best_name]['r2_log']:.4f})")
+    # judged on the cv score
+    # cv_r2 is log-space r2, fair across magnitudes
+    best_name = max(summary, key=lambda n: summary[n]["cv_r2"])
+    print(f"\nbest: {best_name} (cv_r2={summary[best_name]['cv_r2']:.4f}, "
+          f"held-out test r2_log={summary[best_name]['r2_log']:.4f})")
 
     prod.mkdir(parents=True, exist_ok=True)
     joblib.dump(fitted[best_name], prod / "best.joblib")
-
-    # feature importance if available, nice for the report
-    importance = {}
-    bm = fitted[best_name]
-    if hasattr(bm, "feature_importances_"):
-        importance = dict(sorted(zip(list(X_train.columns), bm.feature_importances_.tolist()),
-                                 key=lambda kv: kv[1], reverse=True))
 
     meta = {
         "model_name": best_name,
         "log_target": True,
         "deployment_time": datetime.now(timezone.utc).isoformat(),
         "metrics": summary[best_name],
-        "feature_importance": importance,
     }
     (prod / "metadata.json").write_text(json.dumps(meta, indent=2))
     print(f"saved model + metadata to {prod}")
