@@ -81,5 +81,5 @@ output and are not committed, same as `data/` and `models/`.
     trainer/      dataset build, sharded training, model selection
     predictor/    cli predictor
     scripts/      demo seed + crawl/train wrappers
-    infra/        dockerfiles + git hooks
+    infra/        dockerfiles
     experiments/  scaling scripts + plots
